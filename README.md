@@ -35,11 +35,12 @@ TalentScout is an AI-powered hiring assistant chatbot built using **Llama 3 via 
 
 bash"""
 git clone https://github.com/your-username/talent-scout-chatbot.git
+
 cd talent-scout-chatbot"""
 
 2. ✅ Install Required Python Libraries
-bash"""
-pip install -r requirements.txt"""
+bash
+"""pip install -r requirements.txt"""
 
 🔐 Fetching Your Groq API Key
 Go to: https://console.groq.com/keys
@@ -53,12 +54,13 @@ Paste it into the Streamlit sidebar when prompted.
 🔒 Your key is only used locally and never stored.
 
 ▶️ Running the App
-bash"""
-streamlit run app.py"""
+bash
+"""streamlit run app.py"""
 
 Then open http://localhost:8501 in your browser.
 
 📁 Project Structure
+
 
 chatbot/
 ├── app.py
