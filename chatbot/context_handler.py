@@ -36,7 +36,7 @@ class ChatContext:
     def get_bot_response(self, user_input):
         self.messages.append({"role": "user", "content": user_input})
 
-        # Collect candidate details
+        
         if self.stage < len(self.data):
             key = list(self.data.keys())[self.stage]
             if self._is_valid_input(key, user_input):
@@ -49,7 +49,7 @@ class ChatContext:
                     self.messages.append({"role": "assistant", "content": prompt})
                     return prompt
                 else:
-                    # All info collected
+                    
                     save_candidate_data(self.data)
                     tech_prompt = generate_tech_questions(self.data["tech_stack"])
                     self.messages.append({"role": "assistant", "content": tech_prompt})

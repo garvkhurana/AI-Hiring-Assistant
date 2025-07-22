@@ -3,9 +3,9 @@ from chatbot.context_handler import ChatContext
 from chatbot.prompts import generate_greeting, end_conversation_check
 import os
 
-st.set_page_config(page_title="🤖 TalentScout AI", layout="centered")
+st.set_page_config(page_title="TalentScout AI", layout="centered")
 
-# 🌈 Inject Custom Styling
+
 st.markdown("""
     <style>
     body {
@@ -31,11 +31,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 🧠 Heading
+
 st.markdown("<h1 style='text-align:center; color:#673AB7;'>🌍 TalentScout – AI Hiring Assistant</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center; color:gray;'>Multilingual | Smart | Context-Aware</p>", unsafe_allow_html=True)
 
-# ✅ Initialize session keys safely
 if "chat" not in st.session_state:
     st.session_state.chat = None
 
@@ -45,7 +44,6 @@ if "started" not in st.session_state:
 if "reset" not in st.session_state:
     st.session_state.reset = False
 
-# 🔐 SIDEBAR: API Key Input and Info
 with st.sidebar:
     st.header("🔐 API Key")
     api_key = st.text_input("Enter your Groq API key", type="password")
@@ -67,7 +65,6 @@ with st.sidebar:
         st.warning("🔑 Please enter your Groq API key to start.")
         st.stop()
 
-# ✅ Initialize Chat + Ask Name Prompt
 if not st.session_state.chat:
     st.session_state.chat = ChatContext()
 
@@ -77,7 +74,6 @@ if not st.session_state.started:
     name_prompt = st.session_state.chat.start()
     st.chat_message("assistant").markdown(name_prompt)
 
-# 📝 Input + Response
 user_input = st.chat_input("Type your response...")
 
 if user_input:
