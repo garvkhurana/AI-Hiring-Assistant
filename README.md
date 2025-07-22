@@ -59,21 +59,6 @@ bash
 
 Then open http://localhost:8501 in your browser.
 
-📁 Project Structure
-
-
-chatbot/
-├── app.py
-├── chatbot/
-│   ├── __init__.py
-│   ├── context_handler.py
-│   ├── groq_llama.py
-│   ├── prompts.py
-├── data/
-│   └── candidate_data.json
-├── requirements.txt
-└── README.md
-
 
 📦 Output Storage
 All candidate responses are saved in:
