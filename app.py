@@ -1,83 +1,91 @@
 import streamlit as st
 from chatbot.context_handler import ChatContext
-from chatbot.prompts import generate_greeting
+from chatbot.prompts import generate_greeting, end_conversation_check
 import os
 
-st.set_page_config(page_title="TalentScout - AI Hiring Assistant")
+st.set_page_config(page_title="🤖 TalentScout AI", layout="centered")
 
-st.title(" TalentScout - AI Hiring Assistant")
+# 🌈 Inject Custom Styling
+st.markdown("""
+    <style>
+    body {
+        background: linear-gradient(to right, #ece9e6, #ffffff);
+    }
+    .stChatMessage {
+        border-radius: 10px;
+        padding: 10px;
+        margin: 5px 0;
+    }
+    .stChatMessage.user {
+        background-color: #D1C4E9;
+        color: #000;
+    }
+    .stChatMessage.assistant {
+        background-color: #B2EBF2;
+        color: #000;
+    }
+    .stButton > button {
+        background-color: #4CAF50;
+        color: white;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-st.sidebar.title("🔐Groq API Key & Context")
+# 🧠 Heading
+st.markdown("<h1 style='text-align:center; color:#673AB7;'>🌍 TalentScout – AI Hiring Assistant</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:gray;'>Multilingual | Smart | Context-Aware</p>", unsafe_allow_html=True)
 
+# ✅ Initialize session keys safely
+if "chat" not in st.session_state:
+    st.session_state.chat = None
 
-if "groq_key" not in st.session_state:
-    st.session_state.groq_key = ""
+if "started" not in st.session_state:
+    st.session_state.started = False
 
+if "reset" not in st.session_state:
+    st.session_state.reset = False
 
-st.session_state.groq_key = st.sidebar.text_input(
-    "Enter your Groq API Key", type="password", value=st.session_state.groq_key
-)
+# 🔐 SIDEBAR: API Key Input and Info
+with st.sidebar:
+    st.header("🔐 API Key")
+    api_key = st.text_input("Enter your Groq API key", type="password")
 
-os.environ["GROQ_API_KEY"] = st.session_state.groq_key
+    if api_key:
+        os.environ["GROQ_API_KEY"] = api_key
 
+        if st.button("🔄 Restart Chat"):
+            st.session_state.chat = ChatContext()
+            st.session_state.started = False
+            st.experimental_rerun()
 
-if "chat" not in st.session_state or st.sidebar.button("🔄 Start New Session"):
-    if st.session_state.groq_key:  
-        st.session_state.chat = ChatContext()
-        st.session_state.chat.started = True
-        st.session_state.messages = [] 
-        
-      
-        greeting = generate_greeting()
-        st.session_state.messages.append({"role": "assistant", "content": greeting})
-        
-        first_prompt = st.session_state.chat.start()
-        st.session_state.messages.append({"role": "assistant", "content": first_prompt})
+        if st.session_state.chat:
+            st.markdown("---")
+            st.subheader("📋 Candidate Details")
+            for k, v in st.session_state.chat.data.items():
+                st.markdown(f"{'✅' if v else '🕘'} **{k.replace('_',' ').title()}:** {v or '*pending...*'}")
     else:
-        st.error("Please enter your Groq API Key to start.")
+        st.warning("🔑 Please enter your Groq API key to start.")
+        st.stop()
 
+# ✅ Initialize Chat + Ask Name Prompt
+if not st.session_state.chat:
+    st.session_state.chat = ChatContext()
 
-if "chat" in st.session_state and "messages" in st.session_state:
-    
-    st.sidebar.subheader("📋 Collected Info")
-    for key, val in st.session_state.chat.data.items():
-        display_key = key.replace('_', ' ').title()
-        st.sidebar.text(f"{display_key}: {val if val else 'Not provided'}")
-    
-    
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-    
-    
-    user_input = st.chat_input("Enter your response here...")
-    
-    if user_input:
-        
-        st.session_state.messages.append({"role": "user", "content": user_input})
-        with st.chat_message("user"):
-            st.markdown(user_input)
-        
-        
-        try:
-            response = st.session_state.chat.get_bot_response(user_input)
-            st.session_state.messages.append({"role": "assistant", "content": response})
-            with st.chat_message("assistant"):
-                st.markdown(response)
-        except Exception as e:
-            error_msg = f"Error: {str(e)}. Please check your API key."
-            st.error(error_msg)
-    
-   
-    if hasattr(st.session_state.chat, 'ready_for_questions') and st.session_state.chat.ready_for_questions:
-        if st.button("👉 Proceed to Technical Questions"):
-            try:
-                response = st.session_state.chat.get_bot_response("go ahead")
-                st.session_state.messages.append({"role": "assistant", "content": response})
-                with st.chat_message("assistant"):
-                    st.markdown(response)
-                st.rerun()  
-            except Exception as e:
-                st.error(f"Error generating questions: {str(e)}")
-else:
-    st.info("Please enter your Groq API Key in the sidebar to get started.")
+if not st.session_state.started:
+    st.session_state.started = True
+    st.chat_message("assistant").markdown(generate_greeting())
+    name_prompt = st.session_state.chat.start()
+    st.chat_message("assistant").markdown(name_prompt)
+
+# 📝 Input + Response
+user_input = st.chat_input("Type your response...")
+
+if user_input:
+    st.chat_message("user").markdown(user_input)
+
+    if end_conversation_check(user_input):
+        st.session_state.chat.end()
+        st.chat_message("assistant").markdown("✅ Thank you! We'll get back to you soon.")
+    else:
+        bot_reply = st.session_state.chat.get_bot_response(user_input)
+        st.chat_message("assistant").markdown(bot_reply)
